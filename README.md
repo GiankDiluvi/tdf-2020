@@ -1,7 +1,7 @@
 # Analyzing the 2020 Tour de France
 Author: Gian Carlo Di-Luvi \
 STAT 538 final project \
-UBC Statistics \
+UBC Statistics
 
 ## Description
 
