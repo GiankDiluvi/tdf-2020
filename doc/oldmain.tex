@@ -1,0 +1,90 @@
+\documentclass[aos,preprint]{imsart}
+
+\usepackage{amsthm,amsmath,natbib}
+%\RequirePackage[colorlinks,citecolor=blue,urlcolor=blue]{hyperref}
+
+% provide arXiv number if available:
+%\arxiv{arXiv:0000.0000}
+
+% put your definitions there:
+%\RequirePackage{amsthm,amsmath,amsfonts,amssymb}
+%\RequirePackage[numbers]{natbib}
+%\RequirePackage[authoryear]{natbib} %% uncomment this for author-year bibliography
+%\RequirePackage[colorlinks,citecolor=blue,urlcolor=blue]{hyperref}
+\RequirePackage{graphicx}
+\bibliography{ref/tdf-2020.bib}
+\graphicspath{{fig/}}
+%\usepackage[autonum]{macros/macros}
+%\usepackage{natbib}
+
+\allowdisplaybreaks
+
+\begin{document}
+
+\begin{frontmatter}
+\title{A zero-inflated analysis of the 2020 Tour de France}
+%\title{A sample article title with some additional note\thanksref{t1}}
+\runtitle{A zero-inflated analysis of the 2020 Tour de France}
+%\thankstext{T1}{A sample additional note to the title.}
+
+\begin{aug}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%Only one address is permitted per author. %%
+%%Only division, organization and e-mail is %%
+%%included in the address.                  %%
+%%Additional information can be included in %%
+%%the Acknowledgments section if necessary. %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\author[A]{\fnms{Gian Carlo} \snm{Di-Luvi}\ead[label=e1]{gian.diluvi@stat.ubc.ca}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Addresses                                %%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\address[A]{Department of Statistics,
+University of British Columbia.
+\printead{e1}}
+\end{aug}
+
+\begin{abstract}
+The abstract should summarize the contents of the paper.
+It should be clear, descriptive, self-explanatory and not longer
+than 200 words. It should also be suitable for publication in
+abstracting services. Formulas should be used as sparingly as
+possible within the abstract. The abstract should not make
+reference to results, bibliography or formulas in the body
+of the paper---it should be self-contained.
+
+This is a sample input file.  Comparing it with the output it
+generates can show you how to produce a simple document of
+your own.
+\end{abstract}
+
+%\begin{keyword}[class=MSC2020]
+%\kwd[Primary ]{00X00}
+%\kwd{00X00}
+%\kwd[; secondary ]{00X00}
+%\end{keyword}
+
+%\begin{keyword}
+%\kwd{First keyword}
+%\kwd{second keyword}
+%\end{keyword}
+
+\end{frontmatter}
+
+%\input{notes}
+
+%\input{litreview}
+
+%\input{normal-mixture}
+
+
+%\appendix
+
+%\input{proofs}
+
+\cite{Aldous:2010}
+
+\small
+\bibliographystyle{imsart-nameyear}
+\bibliography{ref/tdf-2020.bib}
+\end{document}

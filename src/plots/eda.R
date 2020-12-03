@@ -5,6 +5,7 @@ library(MASS)
 library(tidyverse)
 library(readr)
 library(ggplot2)
+library(patchwork)
 library(lubridate)
 library(stringr)
 library(statmod) #tweedie glm
@@ -68,15 +69,30 @@ stages_2020 <- stages_2020 %>%
   dplyr::group_by(stage) %>% 
   dplyr::arrange(cumtime, rank) %>% 
   dplyr::mutate(gc_rank = 1:n(),
-                timediff = time_seconds - min(time_seconds)) %>% 
+                timediff = cumtime - min(cumtime)) %>% 
   dplyr::ungroup()
   
+
 # save data
 readr::write_csv(stages_2020, path = "../../data/tour-de-france-data.csv")
 
 
+# data summaries ####
+
+glimpse(stages_2020)
+
+# riders by stage
+stages_2020 %>% 
+  dplyr::select(stage, rider_number) %>% 
+  dplyr::group_by(stage) %>% 
+  dplyr::summarise(n = n())
+
+# different stage types
+stages_2020 %>% 
+  dplyr::distinct(stage_type)
+
 # viz ####
-text_size <- 16
+text_size <- 18
 
 # time differences boxplots per stage
 stages_2020 %>% 
@@ -110,7 +126,7 @@ stages_2020 %>%
   theme(text = element_text(text_size),
         axis.ticks.y = element_blank(),
         axis.line.y.left = element_blank())
-ggsave("../../doc/fig/timediff_hist.jpg")
+ggsave("../../doc/fig/timediff_hist.png")
 
 
 # time difference boxplots per stage
@@ -119,9 +135,71 @@ stages_2020 %>%
   ggplot(aes(x = factor(stage), y = timediff)) +
   geom_boxplot() +
   labs(x = "stage",
-       y = "time difference to leader (seconds)") 
+       y = "time difference to leader (seconds)")  +
+  theme(text = element_text(text_size))
 #geom_jitter(width = 0.1, alpha = 0.5)
-ggsave("../../doc/fig/timediff_stage.jpg")
+ggsave("../../doc/fig/timediff_stage.png")
+
+
+# time difference trend by distance
+stages_2020 %>% 
+  ggplot(aes(x = distance, y = timediff)) +
+  geom_jitter(width = 2) +
+  labs(x = "stage distance (km)",
+       y = "time difference to leader (seconds)") +
+  theme(text = element_text(text_size))
+ggsave("../../doc/fig/timediff_distance.png")
+
+
+# time difference by stage and contender
+stages_2020 %>% 
+  dplyr::filter(rider_number %in% c(131, 11, 101, 61, 94, 141, 1, 3, 14, 
+                                    29, 71, 91, 121, 161)) %>% 
+  ggplot(aes(x = stage, y = timediff, group = rider, color= rider)) +
+  geom_line() +
+  labs(x = "stage distance (km)",
+       y = "time difference to leader (seconds)",
+       color = "rider") +
+  theme(text = element_text(text_size)) +
+  scale_color_viridis_d()
+ggsave("../../doc/fig/timediff_contender_distance.png")
+
+
+# time difference by contender
+timediff_contender <- stages_2020 %>% 
+  dplyr::filter(rider_number %in% c(131, 11, 101, 61, 94, 141, 1, 3, 14, 
+                                                       29, 71, 91, 121, 161)) %>% 
+  ggplot(aes(x = rider, y = timediff)) +
+  geom_boxplot() +
+  labs(x = "rider",
+       y = "time difference to leader (seconds)",
+       color = "rider") +
+  theme(text = element_text(text_size)) +
+  coord_flip()
+ggsave("../../doc/fig/timediff_contender.png", timediff_contender)
+
+
+# time difference by team
+timediff_team <- stages_2020 %>% 
+  ggplot(aes(x = team, y = timediff)) +
+  geom_boxplot() +
+  labs(x = "team",
+       y = "time difference to leader (seconds)",
+       color = "rider") +
+  theme(text = element_text(text_size)) +
+  coord_flip()
+ggsave("../../doc/fig/timediff_team.png", timediff_team)
+
+
+# glue time diff by team and rider in one plot
+
+timediff_contender <- timediff_contender + 
+  labs(tag = "(a)")
+timediff_team <- timediff_team + 
+  labs(tag = "(b)")
+timediff_contender_team <- timediff_contender / timediff_team
+ggsave("../../doc/fig/timediff_contender_team.png", timediff_contender_team, height = 12)
+
 
 # time boxplots per stage
 stages_2020 %>% 
@@ -129,16 +207,38 @@ stages_2020 %>%
   ggplot(aes(x = factor(stage), y = time_seconds)) +
   geom_boxplot() +
   labs(x = "stage",
-       y = "time (seconds)") 
+       y = "time (seconds)")  +
+  theme(text = element_text(text_size))
 #geom_jitter(width = 0.1, alpha = 0.5)
-ggsave("../../doc/fig/time_stage.jpg")
+ggsave("../../doc/fig/time_stage.png")
 
-# time trend by distance
+# time trend by distance and stage
 stages_2020 %>% 
   ggplot(aes(x = distance, y = time_seconds, color = factor(stage))) +
   geom_point() +
-  scale_color_viridis_d()
+  scale_color_viridis_d() +
+  theme(text = element_text(text_size))
 
+
+# time trend by distance
+stages_2020 %>% 
+  ggplot(aes(x = distance, y = time_seconds)) +
+  geom_point() +
+  labs(x = "stage distance (km)",
+       y = "time (seconds)") +
+  theme(text = element_text(text_size))
+ggsave("../../doc/fig/time_distance.png")
+
+
+# time qqplot
+stages_2020 %>% 
+  ggplot(aes(sample = time_seconds)) +
+  stat_qq() +
+  stat_qq_line() +
+  labs(x = "theoretical",
+       y = "sample") +
+  theme(text = element_text(text_size))
+ggsave("../../doc/fig/time_qqplot.png")
 
 # histogram of time
 stages_2020 %>% 
@@ -159,8 +259,9 @@ stages_2020 %>%
   ggplot(aes(x = factor(stage), y = cumtime)) +
   geom_jitter(width = 0.2) +
   labs(x = "stage",
-       y = "cumulative time (s)")
-ggsave("../../doc/fig/cumtime_stage.jpg")
+       y = "cumulative time (s)") +
+  theme(text = element_text(text_size))
+ggsave("../../doc/fig/cumtime_stage.png")
 
 
 
@@ -284,7 +385,7 @@ tibble(rank = training$gc_rank,
 # basic lm
 lm_mod <- lm(cumtime ~ stage + distance + stage_type, data = stages_2020)
 summary(lm_mod)
-plot(lm_mod)
+#plot(lm_mod)
 
 tibble(x = lm_mod$fitted.values, 
        y = lm_mod$residuals) %>% 
@@ -302,7 +403,7 @@ training <- stages_2020 %>%
 
 lm_mod <- lm(time_seconds ~ stage + distance + contender, data = training %>% dplyr::filter(stage < 20))
 summary(lm_mod)
-plot(lm_mod)
+#plot(lm_mod)
 
 tibble(x = lm_mod$fitted.values, 
        y = lm_mod$residuals,
@@ -317,18 +418,18 @@ pred_data <- training %>%
   dplyr::filter(stage == 20) %>% 
   dplyr::select(distance, contender)
 
-preds <- predict(lm_mod, newdata = pred_data)
+#preds <- predict(lm_mod, newdata = pred_data)
 
-pred_data <- pred_data %>% 
-  dplyr::mutate(mean_prediction = preds) %>% 
-  dplyr::arrange(mean_prediction)
-pred_data
+#pred_data <- pred_data %>% 
+#  dplyr::mutate(mean_prediction = preds) %>% 
+#  dplyr::arrange(mean_prediction)
+#pred_data
 
-stages_2020 %>% 
-  dplyr::filter(stage == 20) %>% 
-  dplyr::select(rider, timediff) %>% 
-  dplyr::mutate(mean_prediction = preds) %>% 
-  dplyr::arrange(timediff)
+#stages_2020 %>% 
+#  dplyr::filter(stage == 20) %>% 
+#  dplyr::select(rider, timediff) %>% 
+#  dplyr::mutate(mean_prediction = preds) %>% 
+#  dplyr::arrange(timediff)
 
 
 # tweedie 1
@@ -348,13 +449,14 @@ pred_data <- tweedie_training %>%
   dplyr::filter(stage == 20) %>% 
   dplyr::select(stage, distance, team, contender)
 
-preds <- predict(tweedie1, newdata = pred_data)
-phi <- 22.27065
+preds <- exp(predict(tweedie1, newdata = pred_data)) # exp to get in scale of mean and not log scale
+phi <- 17.95275
 
 pred_data <- pred_data %>% 
-  dplyr::mutate(prediction= preds,
+  dplyr::mutate(prediction = preds,
+                logpred = log(preds),
                 min_prediction = prediction - min(prediction),
-                lambda = 2* sqrt(prediction) / phi,
+                lambda = 2* sqrt(logpred) / phi,
                 prob0 = exp(-lambda)) %>% 
   dplyr::arrange(prob0)
 pred_data
@@ -362,7 +464,7 @@ pred_data
 stages_2020 %>% 
   dplyr::filter(stage == 20) %>% 
   dplyr::select(rider, timediff) %>% 
-  dplyr::mutate(prediction= preds,
+  dplyr::mutate(prediction = preds,
                 min_prediction = prediction - min(prediction),
                 lambda = 2* sqrt(prediction) / phi,
                 prob0 = exp(-lambda)) %>% 
@@ -380,5 +482,48 @@ tibble(x = tweedie1$fitted.values,
   geom_hline(yintercept = 0) +
   labs(x = "Fitted values",
        y = "Normalized residuals") +
-  scale_y_continuous(breaks = -5:5)
+  scale_y_continuous(breaks = -5:5) +
+  theme(text = element_text(size = text_size))
 ggsave("../../doc/fig/norm_res.png")  
+
+
+# fitted timediff by stage
+colors = c("true" = "#39558CFF", "fitted" = "#56C667FF", "predicted" = "#E55C30FF")
+
+tibble(x = stages_2020 %>% dplyr::filter(stage < 20) %>% pull(stage),
+       fitted = tweedie1$fitted.values,
+       true = stages_2020 %>% dplyr::filter(stage < 20) %>% pull(timediff)) %>% 
+  ggplot(aes(x, fitted)) +
+  geom_point(aes(color = "fitted"), alpha = 0.9) +
+  geom_point(aes(x + 0.25, true, color = "true"), alpha = 0.9) +
+  geom_point(data = tibble(xx = 20.25, true = stages_2020 %>% dplyr::filter(stage == 20) %>% pull(timediff)),
+             aes(xx, true, color = "true")) +
+  geom_point(data = tibble(xx = 20, predicted = preds),
+             aes(xx, predicted, color = "predicted")) +
+  labs(x = "stage",
+       y = "time difference to leader (seconds)",
+       color = "") +
+  scale_color_manual(values = colors, breaks = c("true", "fitted", "predicted")) +
+  theme(text = element_text(size = text_size),
+        legend.position = "top")
+ggsave("../../doc/fig/fitted_predicted.png")
+
+# top 10 predicted vs actual
+stages_2020 %>% 
+  dplyr::filter(stage == 20) %>% 
+  dplyr::select(rider, gc_rank, timediff) %>% 
+  dplyr::mutate(prediction = preds,
+                lambda = 2* sqrt(prediction) / phi,
+                prob0 = exp(-lambda)) %>% 
+  dplyr::arrange(desc(prob0)) %>% 
+  dplyr::mutate(pred_gc_rank = 1:n()) %>% 
+  dplyr::top_n(10, wt = -gc_rank) %>% 
+  dplyr::arrange(gc_rank) %>% 
+  dplyr::select(rider, gc_rank, pred_gc_rank, prob0)
+
+
+
+
+
+
+
