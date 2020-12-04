@@ -1,3 +1,6 @@
+# scrape Tour de France data from the Tour's website
+# author: Gian Carlo Diluvi
+
 import pandas as pd
 import numpy as np
 
@@ -27,4 +30,5 @@ df['edition'] = 107*np.ones(len(df.index))
 df[['edition', 'year', 'Rank', 'Rider', 'Team', 'Rider No.']]
 
 print(df.head())
-df.to_csv('../plots/scraped.csv', index = False)
+#df.to_csv('aux_data/scraped.csv', index = False) # original
+df.to_csv('aux_data/scraped_v2.csv', index = False) # TdF webpage will change its content at some point, so change name to not overwrite original scraped data
