@@ -48,7 +48,7 @@ The Tour de France is the most prestigious cycling race in the world. Tadej Poga
 \section{Introduction} \label{sec:intro}
 
 
-The Tour de France is cycling's best known and most prestigious race. In its current format, multiple teams of riders compete in 21 races (called stages) spred across 23 days. Many competitions take place at the Tour each year. In the points classification, points are given to stage winners and during intermediate sprints; in the mountains classification, riders who arrive first to mountain summits get points. The most important competition, however, is the general classification. Succinctly, the general classification is won by the rider who completes the Tour in the least amount of time. The rider who wins the general classification is said to have won the Tour, and in this report we refer to the race leader as the rider who is currently leading the general classification. \\
+The Tour de France is cycling's best known and most prestigious race. In its current format, multiple teams of riders compete in 21 races (called stages) spread across 23 days. Many competitions take place at the Tour each year. In the points classification, points are given to stage winners and during intermediate sprints; in the mountains classification, riders who arrive first to mountain summits get points. The most important competition, however, is the general classification. Succinctly, the general classification is won by the rider who completes the Tour in the least amount of time. The rider who wins the general classification is said to have won the Tour, and in this report we refer to the race leader as the rider who is currently leading the general classification. \\
 
 
 The 2020 Tour de France saw 175 riders organized in 22 teams compete for the general classification. The favorite to win the Tour was Slovenian Primož Roglič, who is currently considered to be the best cyclist in the world.\footnote{See \url{https://www.uci.org/road/rankings.}} Roglič led the Tour for 11 stages but lost the lead to compatriot and youngster Tadej Pogačar in stage 20. Tradition dictates the last stage (i.e. stage 21) to be ceremonial: cyclists ride to Paris while celebrating that the Tour is over, and no positions are contested. Pogačar thus maintained his lead and won the Tour. But Pogačar not only beat Roglič in the last possible stage---he did it against all odds and by a significant time margin of 59 seconds (after being down 57 seconds in stage 19). \\
@@ -57,17 +57,15 @@ The 2020 Tour de France saw 175 riders organized in 22 teams compete for the gen
 In this report, we explore whether Pogačar's victory was truly as unpredictable as people took it to be, or if there is evidence to suggest his chances of winning were underestimated. For this purpose, we develop a zero-inflated model based on the Tweedie distribution to study the time difference of each rider to the race leader. The Tweedie distribution has been studied extensively in the actuarial science and rainfall literatures, where zero-inflated phenomena occur frequently \citep[see][and references therein]{jorgensen1994, withers2011}. It has also been used to model dollar-denominated outcomes \citep{lauderdale2012} and even to predict cyanobacterial biovolume from a Bayesian perspective \citep{haakonsson2020}. We train this model on data scraped from the Tour's official website (\url{letour.fr}). \\
 
 
-6: Normalized residuals of the compound Poisson-Gamma models, withcolor by response function. The vast majority of values are well within the±3 bound. The models tend to overestimate when fitted values are smalland underestimate when they are large.overcome this would be to restrict the values of the parameter associatedwith stage number to be non-negative, which would allow that covariateto linearly influence the response. Given the observed positive associationbetween stage number and time difference, this might be reasonable. Therest of the parameters can be scaled using another response function—whichwould result in a non-linear model—or alternatively they can be similarlyrestricted. Whether optimization methods are guaranteed to converge in thissetting is also left for future work. Another alternative would be to use aBayesian approach and directly incorporate the parameter restrictions intotheir prior distributions. Unfortunately, popular probabilistic programminglanguages such asStando not have a built-in Tweedie regression family,which would require the user to develop code to approximate the density.Another limitation is that the model assumes independence between differ-ent stages of the same rider. This can be partly justified by the fact that riderscan almost arbitrarily lose or win time difference at any given stage. However,
-
 Section \ref{sec:data} describes the data collection and summarises the data set. In Section \ref{sec:eda} we do an exploratory data analysis to inform modeling. We describe the model and some modifications in Section \ref{sec:stats}, and then show the results of fitting the model in Section \ref{sec:results}. Section \ref{sec:conclusion} contains concluding remarks and directions for future work.
 
 
 \section{Data description} \label{sec:data}
 
 
-The data contain information of each cyclist and stage of the 2020 Tour de France. A summary of all the variables included in the data set can be found in Table \ref{table:data}. The data are public and were scraped from the Tour's official website\footnote{\url{letour.fr}.} using \texttt{Python} and the 2020 Tour de France Wikipedia webpage\footnote{\url{https://en.wikipedia.org/wiki/2020_Tour_de_France}.} by hand. They were then combined into a single data set containing 3,390 observations and 23 variables. \\
+The data contain information of each cyclist and stage of the 2020 Tour de France. A summary of all the variables included in the data set can be found in Table \ref{table:data}. The data are public and were scraped from the Tour's official website\footnote{\url{letour.fr}.} using \texttt{Python} and from the 2020 Tour de France Wikipedia webpage\footnote{\url{https://en.wikipedia.org/wiki/2020_Tour_de_France}.} by hand. They were then combined into a single data set containing 3,390 observations and 23 variables. \\
 
-Each row corresponds to an observation and each column to a variable. The observations are at the ``rider by stage'' level, i.e., each observation corresponds to a rider at a given stage. Some variables, such as the stage winner's country, are constant across stages. The number of riders is not the same at each stage because some riders leave the race due to injuries. Specifically, 175 riders started the tour but only 146 finished it. There are five different stage types in this data set: flat, medium mountain, hilly, mountain, and mountain time trial. Other stage types exist in the sport but were not included in this year's Tour de France (e.g. team time trial). The cumulative time is determined as the sum of the times at each stage, minus the total bonus seconds, plus the total penalty seconds. Bonus points are awarded to the first three riders to finish each stage; penalties are impossed when cyclists break rules, such as receiving food close to the finish line. Finally, race leader is used interchangeably with general classification leader because that is the most important event of the Tour, even though there are many races going on at the same time.
+Each row corresponds to an observation and each column to a variable. The observations are at the ``rider by stage'' level, i.e., each observation corresponds to a rider at a given stage. Some variables, such as the stage winner's country, are constant across stages. The number of riders is not the same at each stage because some riders leave the race due to injuries. Specifically, 175 riders started the tour but only 146 finished it. There are five different stage types in this data set: flat, medium mountain, hilly, mountain, and mountain time trial. Other stage types exist in the sport but were not included in this year's Tour de France (e.g. team time trial). The cumulative time is determined as the sum of the times at each stage, minus the total bonus seconds, plus the total penalty seconds. Bonus seconds are awarded to the first three riders to finish each stage; penalties are impossed when cyclists break rules, such as receiving food close to the finish line. Finally, race leader is used interchangeably with general classification leader because that is the most important event of the Tour, even though there are many races going on at the same time.
 
 
 
@@ -108,13 +106,13 @@ timediff          & rider's time difference in seconds to race leader           
 \section{Exploratory data analysis} \label{sec:eda}
 
 
-There are many ways to predict the winner of the Tour with the information of the first 19 stages. In this section we investigate two potential variables, cumulative time and time difference to leader. The former is not amenable to statistical model due to the combinatorial restrictions that need to be accounted for. We thus explore the latter in more detail and in preparation for modeling in Section \ref{sec:stats}. It should be noted that stage number plays an important role because, as the race progresses, the riders become more tired. \\
+There are many ways to predict the winner of the Tour with the information of the first 19 stages. In this section we investigate two potential variables, cumulative time and time difference to leader. The former is not amenable to statistical modeling due to the combinatorial restrictions that need to be accounted for. We thus explore the latter in more detail and in preparation for modeling in Section \ref{sec:stats}. It should be noted that stage number plays an important role because, as the race progresses, the riders become more tired. \\
 
 %It should be noted that stage number plays an important role because, as the race progresses, the riders become more tired. There were two rest days: one between stages 9 and 10 and the other between stages 15 and 16. Tour de France riders can recover at faster rates than average people, so that their performance after a rest day could be similar to their performance during the Tour's first stage. In any case, performance can vary significantly by stage and it is thus of interest to account for it when modeling. \\
 
 
 
-To address the statistical question, we could directly work with the rank at each stage. However, working with this variable leads to many statistical complications and complex combinatorial restrictions. We instead explore variables that are not exactly the rank, but that can be used to determine it and are more amenable to statistical modelling. Figure \ref{fig:cumtime} shows the cumulative time of riders by stage. Cumulative time seems to increase linearly by stage, which suggests that a linear regression model might be appropriate. There are, however, some issues with this variable. First, the variance of the observations increases with stage. This is due to the fact that cumulative time is determined by adding individual stage times. The more times are added, the more variability there will be. Second, the observations are not independent: clearly a rider's cumulative time has to increase from one stage to the next. This also imposes a non-trivial combinatorial constraint that makes cumulative time not amenable to statistical modeling. \\
+To address the statistical question, we could directly work with the rank at each stage. However, working with this variable leads to many statistical complications and complex combinatorial restrictions. We instead explore variables that are not exactly the rank, but that can be used to determine it and are more amenable to statistical modeling. Figure \ref{fig:cumtime} shows the cumulative time of riders by stage. Cumulative time seems to increase linearly by stage, which suggests that a linear regression model might be appropriate. There are, however, some issues with this variable. First, the variance of the observations increases with stage. This is due to the fact that cumulative time is determined by adding individual stage times. The more times are added, the more variability there will be. Second, the observations are not independent: clearly a rider's cumulative time has to increase from one stage to the next. This also imposes a non-trivial combinatorial constraint that makes cumulative time not amenable to statistical modeling. \\
 
 
 \begin{figure}[h]
@@ -145,7 +143,7 @@ One alternative to cumulative time is the time difference of every rider to the 
 %  \label{fig:timediff_contender_team}
 %\end{figure}
 
-Figures \ref{fig:timediff_contender} and \ref{fig:timediff_team} suggest that time differences vary between the top contenders\footnote{These were determined by looking up the team leaders and favorites prior to the race.} of the Tour, and slightly between the teams as well. The model proposed in Section \ref{sec:stats} takes these two variables into account.
+Figures \ref{fig:timediff_contender} and \ref{fig:timediff_team} suggest that time differences vary between the top contenders\footnote{These were determined by looking up the team leaders and favorites prior to the race.} of the Tour, and slightly between the teams as well. The model proposed in Section \ref{sec:stats} takes these two variables into account. Although not shown in this section, the distance ridden at each stage is also an important factor (shorter stages will invariably be completed in less time) and will be considered in the model.
 
 
 \begin{figure}[h]
@@ -172,11 +170,12 @@ Figures \ref{fig:timediff_contender} and \ref{fig:timediff_team} suggest that ti
 
 In this section, a zero-inflated probability model is proposed to study the time differences of riders. The model is then modified to account for combinatorial restrictions. Two response functions are proposed to fit the model to the data.
 
-
+\FloatBarrier
 
 \subsection{Tweedie distribution}
 
 There are two issues when dealing with the time differences. First, there is a non-zero probability of the time difference being zero. Indeed, at each stage there will be at least one observation equal to zero---namely, the leader of the race. Second, there \textit{has} to be at least one observation equal to zero at each stage. \\
+
 
 
 To deal with the first issue, we propose modeling the time differences with a \textit{compound Poisson-Gamma} model \citep{tweedie1984, jorgensen1987}, which is defined as follows. Let $N \sim \distPoiss(\lambda)$ and define
@@ -188,7 +187,7 @@ To deal with the first issue, we propose modeling the time differences with a \t
 \]
 where $\gamma_{N, b} \sim \distGamma(N, b)$. The marginal distribution of $Y$ is a compound Poisson-Gamma distribution with parameters $\lambda$ and $b$, denoted $Y \sim \distNamed{CPG}(\lambda, b)$. Observe that $Y$ has a non-zero probability of being zero. Specifically,
 \[
-  P(Y = 0) = P(N = 0) = \exp \{ -\lambda \}.
+  \Pr \{ Y = 0 \} = \Pr \{ N = 0 \} = \exp \{ -\lambda \}.
 \]
 When $N > 0$, $\gamma_{N, b}$ can be thought of as adding $N$ \iid $\distExp(b)$ distributions. More generally, one can add $N$ \iid $\distGamma(a, b)$ distributions \citep[see][]{withers2011}. For the purposes of this report, however, we assume the simpler case of adding exponential distributions. This has the benefit of having one less parameter to fit without losing much flexibility. In that case, it is easy to prove that
 \[
@@ -199,9 +198,9 @@ The marginal density of $Y$ can be calculated in closed form.
 \bnprop
   Let $Y \sim \distNamed{CPG}(\lambda, b)$. Then
   \[
-    p(y; \lambda, b) = \exp\{ -\lambda \} \delta(y) + b \lambda \exp \{ -\lambda - by \} \sum_{n=0}^\infty \frac{(b y \lambda)^n}{(n+1)! n!}. \label{eq:cpg-pdf}
+    p(y; \lambda, b) = \exp\{ -\lambda \} \ind_{\{0\}}(y) + b \lambda \exp \{ -\lambda - by \} \sum_{n=0}^\infty \frac{(b y \lambda)^n}{(n+1)! n!}. \label{eq:cpg-pdf}
   \]
-  where $\delta(y)$ is the Dirac $\delta$-function.
+  where $\ind_A(x) = 1$ if $x \in A$ and 0 otherwise.
 \enprop
 The proof follows from the law of total probability. \cite[See][for example]{ozturk1981}. The sum in Eqn. \refeq{eq:cpg-pdf} converges quickly due to the denominator growing much faster than the numerator \citep{withers2011}. \\
 
@@ -213,7 +212,7 @@ What makes the compound Poisson-Gamma attractive from a regression perspective i
 The mean of an exponential dispersion model is $\mu = A'(\theta)$, and we denote $Y \sim \distNamed{ED}(\mu, \sigma^2)$. Furthermore, if $Y \sim \distNamed{ED}(\mu, \sigma^2)$ then $\var (Y) = \sigma^2 V(\mu)$, where $V(\mu) = A''((A')^{-1}(\mu))$ is the variance function of $Y$. A special case of exponential dispersion models is the \textit{Tweedie family of distributions}. A random variable is said to follow a Tweedie distribution with power parameter $p$ if $Y \sim \distNamed{ED}(\mu, \sigma^2)$ and $V(\mu) = \mu^p$ for some $p \in \reals$, in which case we denote $Y \sim \distNamed{Tweedie}(\mu, \sigma^2, p)$. Compound Gamma-Poisson models are Tweedie distributions. \\
 
 \bnprop
-  If $Y \sim \distNamed{CPG}(\lambda, b)$ then $Y \sim \distNamed{Tweedie}(\mu, \sigma^2, p = 1.5)$ with
+  If $Y \sim \distNamed{CPG}(\lambda, b)$ then $Y \sim \distNamed{Tweedie}(\mu, \sigma^2, p = 1.5)$\footnote{More generally, if adding $N$ \iid $\distGamma(a, b)$ instead of $\distExp(b)$ distributions then $p = (a+2) / (a+1) \in (1, 2)$.} with
   \[
     \mu &= \frac{\lambda}{b}, \\
     \sigma^2 &= \frac{2}{\sqrt{\lambda b}}.
@@ -224,7 +223,7 @@ A proof can be found in \citep{jorgensen1994} by substituting $\alpha = -1$ in t
 \[
   \theta = -2 \mu^{-\half}, \quad A(\theta) = - 4 \theta^{-1}. \label{eq:canonical}
 \]
-In summary, by modeling the time difference of riders to the race leader with a compound Poisson-Gamma model, we actually end up with a Tweedie distribution.
+%In summary, by modeling the time difference of riders to the race leader with a compound Poisson-Gamma model, we end up with a Tweedie distribution.
 
 
 
@@ -234,17 +233,17 @@ Maximum-likelihood estimates (MLE) for the parameters of a Tweedie distribution 
 
 In our case, let $Y_n^k$ denote the time difference of rider $n$ to the race leader at stage $k$, $n=1, ..., N, \, k = 1, ...K$. We will assume that $Y_n^k \distiid \distNamed{Tweedie}(\mu_n^k, \sigma^2, p = 1.5)$. For presentation purposes, we assume there are the same number of riders by stage to avoid using $N_k$. This has no impact on the analysis. \\
 
-We also assume independence both between riders and within stages for a given rider. Between riders, each rider is assumed to try to race in as little time as possible regardless of other riders. Within riders, it would be intuitive to assume that a given rider's time difference in a stage has a lot of influence on the next stage. This is not necessarily so, however: it is not uncommon for riders to launch attacks and reduce their time difference considerably, or alternatively to break down in a climb and lose plenty of time.\footnote{This happended to the defending champion, Egan Bernal, while ascending the Grand Colombier in stage 15. He lost 7 minutes on his 59 seconds gap and subsequently abandoned the race.} Finally, it is also possible for two riders to have the same time difference, and even for two riders to have a time difference of zero. Specifically, final sprints at some stages can result in riders having the same time. Although it is unlikely that two riders will be tied as leaders, it is not technically impossible.\footnote{In 1989, Greg LeMond won the Tour with a time difference of a mere 8 seconds.} \\
+We also assume independence both between riders and within stages for a given rider. Between riders, each rider is assumed to try to race in as little time as possible regardless of other riders. Within riders, it would be intuitive to assume that a rider's time difference at a given stage has a lot of influence on their next stage's time difference. However, this is not necessarily so: it is not uncommon for riders to launch attacks and reduce their time difference considerably, or alternatively to break down in a climb and lose plenty of time.\footnote{This happended to the defending champion, Egan Bernal, while ascending the Grand Colombier in stage 15. He lost 7 minutes on his 59 seconds gap and subsequently abandoned the race.} Finally, it is also possible for two riders to have the same time difference, and even for two riders to have a time difference of zero. Specifically, final sprints at some stages can result in riders having the same time. Although it is unlikely that two riders will be tied as leaders, it is not technically impossible.\footnote{In 1989, Greg LeMond won the Tour with a time difference of a mere 8 seconds.} \\
 
 The likelihood of the data under this setting can be written down as
 \[
   p(y_1^1, ..., y_N^K; \, \mu, \sigma^2) = \prod_{k=1}^K \prod_{n=1}^N p(y_n^k; \, \mu_n^k, \sigma^2),
 \]
-where $\mu = (\mu_1^1, ..., \mu_N^K)^\top$ and $p(y_n^k; \, \mu_n^k, \sigma^2)$ is the Tweedie likelihood. However, as we mentioned before, there is an additional combinatorial restriction: at each stage, there has to be at least one rider with a time difference of zero. We overcome this by adding a multiplicative factor to the likelihood that ensures this restriction is satisfied:
+where $\mu = (\mu_1^1, ..., \mu_N^K)^\top$ and $p(y_n^k; \, \mu_n^k, \sigma^2)$ is the Tweedie likelihood with $p=1.5$. However, as we mentioned before, there is an additional combinatorial restriction: at each stage, there has to be at least one rider with a time difference of zero. We overcome this by adding a multiplicative factor to the likelihood that ensures this restriction is satisfied:
 \[
   p(y_1^1, ..., y_N^K; \, \mu, \sigma^2) = \prod_{k=1}^K \left[ \prod_{n=1}^N p(y_n^k; \, \mu_n^k, \sigma^2) \right] \ind_{\{ 0\}} (y_{(N)}^k),
 \]
-where $\ind_A(x) = 1$ if $x \in A$ and 0 otherwise and $y_{(N)}^k = \min \{y_1^k, ..., y_N^k \}$. The additional factor is 1 when each stage has an observation that is zero and 0 otherwise. The log-likelihood is more illuminating:
+where $y_{(N)}^k = \min \{y_1^k, ..., y_N^k \}$. The additional factor is 1 when each stage has an observation that is zero and 0 otherwise. The log-likelihood is more illuminating:
 \[
   \log p(y_1^1, ..., y_N^K; \, \mu, \sigma^2) = \sum_{k=1}^K \sum_{n=1}^N \log p(y_n^k; \, \mu_n^k, \sigma^2) + \sum_{k=1}^K \log \ind_{\{ 0\}} (y_{(N)}^k). \label{eq:loglike}
 \]
@@ -264,7 +263,7 @@ In our setting, this will also account for the non-constant variance.
 \subsection{Systematic component}
 
 
-Based on the exploratory data analysis of Section \ref{sec:eda}, we will use stage, distance, team, and rider as predictors. The last two variables are categorical, and so it is necessary to create indicator variables for each category (minus one reference category). Because there are around 150 riders and 22 teams, this would entail having $150+22 = 172$ covariates. Even though the training data consist of over 3,000 observations, we consider the risk of overfitting to be too large. On the other hand, however, it is necessary to produce predictions at the rider level to be able to answer the main research question. \\
+Based on the exploratory data analysis of Section \ref{sec:eda}, we will use stage, distance, team, and rider as predictors. The last two variables are categorical, and so it is necessary to create indicator variables for each category (minus one reference category). Because there are around 150 riders and 22 teams, this would entail having $2+149+21 = 172$ covariates. Even though the training data consist of over 3,000 observations, we consider the risk of overfitting to be too large. On the other hand, however, it is necessary to produce predictions at the rider level to be able to answer the main research question. \\
 
 To remedy this, we instead include indicator variables only for the 13 top contenders of the Tour, and aggregate the other riders into an ``Other'' category. Not only does this strike a balance between having predictions at the rider level and not overfitting, but it is also justified in the context of the Tour: not all riders in the Tour are actively trying to win the general classification. Some are aiming to win some of the other races in the Tour (points and mountains), while some are there only to support the team leader. \\
 
@@ -287,7 +286,7 @@ One alternative is to use a log response function,
 \[
   \log \mu_n^k = \eta_n^k, \quad n = 1, ..., N, \, k = 1, ..., K. \label{eq:log-response}
 \]
-Under the log response function, the covariates have a multiplicative effect on the mean of the response, which makes the model easier to interpret. Another alternative is to use the (scaled) canonical response which, following Eqn. \refeq{eq:canonical}, for this case is given by
+Under the log response function, the covariates have a multiplicative effect on the mean of the response, which makes the model easier to interpret. Another alternative is to use the (scaled) canonical response function which, following Eqn. \refeq{eq:canonical}, for this case is given by
 \[
   (\mu_n^k)^{-\half} = \eta_n^k, \quad n = 1, ..., N, \, k = 1, ..., K. \label{eq:canonical-response}
 \]
